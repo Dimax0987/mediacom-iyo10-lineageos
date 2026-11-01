@@ -1,0 +1,284 @@
+====================================================================
+ LineageOS 23.2 Mediacom (Android 16)
+ per Mediacom SmartPad iyo 10 (M-SP1DY)
+====================================================================
+
+Questo pacchetto sostituisce l'Android 11 Go originale del tablet con
+LineageOS 23.2 (Android 16), gia' sistemata e ottimizzata per questo
+modello. Tutto si fa da un PC Windows con un unico file:
+
+        Mediacom_LineageOS23.bat   (doppio clic, poi scegli dal menu)
+
+Dopo l'installazione non c'e' niente da sistemare a mano: schermo,
+rotazione, Impostazioni, ottimizzazioni e sfondo li sistema la ROM da
+sola al primo avvio. L'unica scelta facoltativa e' il ROOT.
+
+ATTENZIONE
+ - Funziona SOLO sul Mediacom SmartPad iyo 10, modello M-SP1DY
+   (build "1DY"). Lo script controlla il modello e si ferma se non
+   corrisponde. Non usarlo su altri tablet.
+ - L'installazione CANCELLA TUTTO: foto, video, app, account.
+   Salva prima quello che ti serve.
+ - Lo fai a tuo rischio. Per tornare al sistema originale serve
+   PhoenixSuit con il firmware originale Mediacom (non incluso).
+
+
+--------------------------------------------------------------------
+ COSA FUNZIONA
+--------------------------------------------------------------------
+Avvio con animazione, Wi-Fi, Bluetooth, touch, audio, rotazione
+automatica, accelerazione grafica (GPU PowerVR GE8300, OpenGL ES 3.2),
+browser e app da F-Droid. Dentro le app e' veloce; il launcher e la
+tendina delle notifiche hanno qualche scatto (limite dell'hardware con
+Android 16).
+
+Limiti:
+ - il blocco schermo con PIN/password/sequenza NON funziona (limite
+   della build originale): non impostarlo
+ - niente app Google (GApps) e niente microG
+ - Vulkan non attivo (non funzionava neanche con il sistema originale;
+   Android e le app usano OpenGL, in pratica non manca)
+ - tablet SOLO Wi-Fi: telefonia, SMS e chiavette 3G/4G non sono
+   supportati (le parti di telefonia sono state tolte)
+Da verificare sul tuo tablet: fotocamere, microfono, standby lungo.
+
+
+--------------------------------------------------------------------
+ COSA C'E' NELLA CARTELLA
+--------------------------------------------------------------------
+ Mediacom_LineageOS23.bat   il programma con il menu
+ LEGGIMI.txt                questo file
+ rom\                       la ROM (file .img.gz)
+ strumenti\                 adb e fastboot di Google, il file
+                            vbmeta_disabled.img e le immagini boot
+                            per il root (opzioni 3-4)
+ log\                       creata dal programma: i registri di
+                            ogni operazione (utili se qualcosa va male)
+
+Nella cartella "rom" serve:
+   lineage-23.2-20260620-a64-bvN_mediacom.img.gz     (926,9 MB)
+   e' la versione modificata per questo tablet, distribuita insieme
+   a questo pacchetto (per esempio nella pagina "Release" del
+   progetto su GitHub).
+   SHA-256: 4F925A25BE147109FDA486AB58BBA443710328A898B3D636A9B57D9AE4F60C7A
+
+Se nella cartella "strumenti" mancano adb.exe e fastboot.exe, scarica
+"SDK Platform-Tools for Windows" da
+   https://developer.android.com/tools/releases/platform-tools
+e copia adb.exe, fastboot.exe e i file .dll nella cartella "strumenti".
+
+
+--------------------------------------------------------------------
+ COSA SERVE
+--------------------------------------------------------------------
+ - un PC con Windows 10 o 11, con circa 2,5 GB liberi sul disco dove
+   si trova questa cartella (la ROM viene decompressa)
+ - un cavo USB che trasmetta DATI (non solo ricarica)
+ - il tablet carico almeno a meta'
+ - il bootloader del tablet SBLOCCATO (vedi sotto)
+
+
+--------------------------------------------------------------------
+ PASSO 0 - PREPARARE IL TABLET (sistema originale)
+--------------------------------------------------------------------
+1. Attiva le Opzioni sviluppatore:
+   Impostazioni > Informazioni sul tablet > tocca 7 volte
+   "Numero build".
+2. In Impostazioni > Sistema > Opzioni sviluppatore attiva:
+   - "Sblocco OEM"
+   - "Debug USB"
+3. Collega il tablet al PC. Sul tablet compare "Consentire debug
+   USB?": spunta "Consenti sempre da questo computer" e premi OK.
+
+Sblocco del bootloader (si fa una volta sola, CANCELLA I DATI).
+Procedura Android standard:
+   - apri un prompt dei comandi nella cartella "strumenti"
+   - adb reboot bootloader
+   - fastboot flashing unlock
+   - conferma sul tablet con i tasti volume/power
+   - fastboot reboot
+Lo sblocco e' riuscito se l'opzione 1 o 2 del menu, in modalita'
+fastboot, mostra "unlocked: yes". Il tablet all'avvio mostrera'
+un avviso di bootloader sbloccato: e' normale.
+
+
+--------------------------------------------------------------------
+ PASSO 1 - CONTROLLO (opzione 1 del menu)
+--------------------------------------------------------------------
+Doppio clic su Mediacom_LineageOS23.bat, scegli 1.
+Deve dire "OK: e' un Mediacom SmartPad iyo 10 M-SP1DY".
+Se il tablet non viene visto: controlla cavo, Debug USB e
+autorizzazione sul tablet, poi i driver (vedi PROBLEMI in fondo).
+
+
+--------------------------------------------------------------------
+ PASSO 2 - INSTALLAZIONE (opzione 2 del menu)
+--------------------------------------------------------------------
+Il programma, da solo:
+ 1. decomprime e verifica la ROM sul PC
+ 2. riavvia il tablet in modalita' "fastbootd"
+ 3. controlla modello, sblocco e slot
+ 4. ti chiede di scrivere SI
+ 5. elimina la partizione product_a (serve spazio per Lineage)
+ 6. scrive LineageOS nella partizione system_a (circa 3 minuti;
+    il messaggio "Invalid sparse file format" e' normale)
+ 7. disattiva le verifiche vbmeta (necessario per avviare Lineage)
+ 8. riavvia il tablet nel RECOVERY
+
+A quel punto, SUL TABLET (tasti VOLUME per spostarsi, POWER per
+confermare; se vedi solo "Nessun comando" tieni premuto POWER e
+premi una volta VOLUME SU):
+ 1. "Wipe data/factory reset"
+ 2. conferma con "Yes" / "Factory data reset"
+ 3. "Reboot system now"
+
+Perche' dal recovery? Il fastboot di questo tablet non riesce a
+cancellare i dati ("fastboot -w" fallisce), il recovery si'.
+
+Il primo avvio dura 5-10 minuti. Poi completa la configurazione
+iniziale (lingua, Wi-Fi...). Fatto: non serve altro.
+
+Al primo avvio la ROM, da sola:
+ - sistema le Impostazioni (senza, si aprirebbe solo la pagina Wi-Fi)
+   e attiva la rotazione automatica
+ - mette lo sfondo HD leggero (vedi DETTAGLI TECNICI)
+ - disattiva i servizi inutili (elenco sotto)
+ - compila tutte le app in modalita' "speed": nella PRIMA MEZZ'ORA
+   circa il tablet e' piu' lento, poi le app diventano molto piu'
+   reattive. Lascialo acceso, meglio se in carica.
+
+
+--------------------------------------------------------------------
+ ROOT CON MAGISK - opzioni 3 e 4 (FACOLTATIVO, A TUO RISCHIO)
+--------------------------------------------------------------------
+!!! I file boot_originale.img e boot_magisk.img nella cartella
+!!! "strumenti" sono SOLO per il Mediacom SmartPad iyo 10 M-SP1DY
+!!! con il firmware originale 1DY (kernel 5.4.99, build #26 del
+!!! 15/07/2021). Scriverli su un altro tablet o con un altro
+!!! firmware puo' impedire l'avvio. Li usi a tuo rischio personale.
+
+ - boot_originale.img: la partizione boot del firmware originale
+   Mediacom (estratta con imgRePacker), serve per tornare indietro
+ - boot_magisk.img: la stessa, modificata con Magisk 30.7
+   (github.com/topjohnwu/Magisk), provata su questo tablet
+
+Opzione 3 - ROOT: con LineageOS avviata e il Debug USB attivo
+(Impostazioni > Sistema > Opzioni sviluppatore; si autorizza il PC
+sul tablet). Controlla i file, il modello e che il kernel del
+tablet sia esattamente quello originale; ti chiede di scrivere SI;
+scrive boot_magisk.img nella partizione boot_a e riavvia; installa
+l'app Magisk. Poi apri l'app Magisk: se chiede una configurazione
+aggiuntiva, accetta (il tablet si riavvia una volta).
+
+Opzione 4 - TOGLI IL ROOT: rimette boot_originale.img. LineageOS e
+i dati restano. Funziona anche con il tablet gia' in modalita'
+fastboot, se dopo il root non si avviasse piu': entra nel recovery
+(di solito tenendo premuti VOLUME SU e POWER all'accensione), scegli
+"Enter fastboot", collega il PC e usa l'opzione 4.
+
+Il root non serve per usare il tablet: e' per chi usa app che lo
+richiedono.
+
+
+--------------------------------------------------------------------
+ ALLA FINE: SICUREZZA
+--------------------------------------------------------------------
+Il Debug USB chiede l'autorizzazione. Se l'hai attivato, finito
+tutto: Impostazioni > Sistema > Opzioni sviluppatore > disattiva
+"Debug USB" (riattivalo solo quando ti serve il PC).
+
+
+--------------------------------------------------------------------
+ PROBLEMI
+--------------------------------------------------------------------
+- Il PC non vede il tablet in fastboot (sul tablet c'e' la
+  schermata "fastbootd" ma l'opzione 1 non lo vede): manca il
+  driver. Installa il "Google USB Driver"
+  (https://developer.android.com/studio/run/win-usb), poi in
+  Gestione dispositivi aggiorna il driver del dispositivo
+  sconosciuto scegliendo "Android Bootloader Interface".
+- Un'operazione si ferma con [STOP] o [ERRORE]: non e' stato fatto
+  niente di pericoloso, leggi il messaggio. I dettagli sono nella
+  cartella "log".
+- La scrittura si interrompe a meta' (opzione 2): NON spegnere il
+  tablet, ripeti l'opzione 2.
+- Ti serve un'app o un servizio disattivato: Impostazioni > App >
+  Tutte le app > (menu) Mostra sistema > scegli l'app > Attiva.
+- Tornare al sistema originale Mediacom: PhoenixSuit con il
+  firmware originale (non incluso in questo pacchetto).
+- Non attivare MAI lo slot "b" (fastboot set_active b): su questo
+  tablet e' vuoto e il tablet non si avvierebbe.
+
+
+--------------------------------------------------------------------
+ DETTAGLI TECNICI
+--------------------------------------------------------------------
+Tablet: SoC Allwinner A133 (4x Cortex-A53), GPU PowerVR GE8300,
+2 GB RAM, Android 11 Go originale (vendor VNDK 30), partizioni A/B
+dinamiche con solo lo slot "a" popolato.
+Architettura GSI: a64 (arm32_binder64, userspace a 32 bit): NON usare
+ROM "arm64" ne' "vndklite", su questo tablet non partono.
+vbmeta_disabled.img: vbmeta AVB vuoto da 4096 byte con verifiche
+disattivate (flags = 3).
+
+LineageOS 23.2 Mediacom: GSI lineage-23.2-20260620-a64-bvN
+(condivisa su XDA, testata in origine su Galaxy A01), modificata:
+ - display: l'hwcomposer Allwinner (sunxihwc) su Android 16 non
+   "prenota" il display (driver usage sfasato di uno): il kernel lo
+   sospendeva dopo 5 s. Fix: power/control=on del dispositivo
+   6000000.disp (rw-system.sh) e riavvio unico di SurfaceFlinger
+   all'avvio dell'animazione (vndk.rc).
+ - rotazione: il sensore (mc34xx) e' montato girato di 180 gradi.
+   Copia corretta di /vendor/etc/gsensor.cfg montata sopra
+   l'originale all'avvio (vendor non viene modificata).
+ - Bluetooth: bluetooth.gd.start_timeout=10000 (build.prop): il chip
+   XRadio impiega circa 3 s a caricare il firmware.
+ - CPU schedutil con minimo 1008 MHz, GPU a 456 MHz fissi (il
+   governor originale la lasciava sempre a 228 MHz), I/O
+   mq-deadline, zram 2 GB, swappiness 100 (rw-system.sh e
+   phh-on-boot.sh).
+ - compilazione delle app in "speed": tutte al primo avvio, poi anche
+   le app nuove.
+ - tablet solo Wi-Fi: rimosse le app Telefono, Messaggi, Contatti
+   (resta il provider dei contatti, serve a WhatsApp e simili),
+   backup contatti, SIM Toolkit, SimAppDialog, Cell Broadcast legacy,
+   CallLogBackup, Info di emergenza, Wallet, Tag NFC, SecureElement,
+   app degli operatori (CarrierDefaultApp, ONS, Iwlan, QNS, IMS
+   entitlement, WAP push, QcRilAm, MtkInCallService); svuotati i file
+   delle funzioni di telefonia (telephony.gsm.xml, telephony.ims.xml).
+ - disattivati al primo avvio (non rimossi, si riattivano dalle
+   Impostazioni): NFC, Cell broadcast, AdServices,
+   OnDevicePersonalization, FederatedCompute, Health Connect,
+   terminale Virtual Machine, EasterEgg, DeviceDiagnostics, RKPD,
+   StatementService, backup Seedvault, installatore DSU, avvisi
+   "Trust" di Lineage. La stampa resta attiva.
+ - al primo avvio anche: Impostazioni a pagina intera
+   (settings_support_large_screen false), rotazione automatica,
+   scansione Bluetooth in background spenta, max 16 processi in cache.
+ - sfondi predefiniti ridotti a 1152x1280 (erano 1728x1920 e
+   2160x2400, in framework-res.apk). In orizzontale l'hwcomposer
+   Allwinner fa ruotare lo sfondo al chip G2D a ogni fotogramma:
+   con uno sfondo grande il launcher e la tendina rallentavano
+   molto. Android allarga sempre lo sfondo PREDEFINITO a 1920x1920,
+   mentre uno sfondo scelto dall'utente viene ritagliato alla misura
+   dello schermo. Per questo al primo avvio la ROM mette l'immagine
+   HD come sfondo utente. Se cambi sfondo, scegline uno in HD.
+ - tendina delle notifiche piu' lenta e morbida: scala durata
+   animatore 1.3, impostata una sola volta al primo avvio; si cambia
+   in Opzioni sviluppatore > "Scala durata animatore".
+ - Debug USB con autorizzazione; "Debug come root" disponibile.
+Le impostazioni del primo avvio sono in /system/bin/phh-on-boot.sh
+(proprieta' persist.sys.mediacom.setup e persist.sys.mediacom.speed).
+SHA-256 dell'immagine .img (1880514560 byte):
+   BC3201DECDAF12B6CAA6DA28ADC9322CCE953D3D40BB9A139C94D2BE25AA623F
+
+
+--------------------------------------------------------------------
+ RINGRAZIAMENTI
+--------------------------------------------------------------------
+ - LineageOS (https://lineageos.org)
+ - TrebleDroid / phhusson, base delle GSI
+ - chi ha compilato e condiviso la GSI LineageOS 23.2 a64 su XDA
+ - topjohnwu per Magisk
+ - Google, per adb e fastboot (Android SDK Platform-Tools,
+   licenza in strumenti\NOTICE.txt)
